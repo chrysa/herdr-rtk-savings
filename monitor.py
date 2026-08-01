@@ -24,6 +24,7 @@ Commands:
 import fcntl
 import json
 import os
+import shutil
 import signal
 import sqlite3
 import subprocess
@@ -42,7 +43,34 @@ GAUGE_CELLS = 10
 LOW_PCT, HIGH_PCT = 40, 80
 VARIANTS = ("rtk", "rtk_low", "rtk_hi", "rtk_sum")  # each styled by its own sidebar row
 
-HERDR = os.environ.get("HERDR_BIN_PATH", "herdr")
+def herdr_bin():
+    """Absolute path to the herdr CLI.
+
+    Plugin commands do not inherit the user's login PATH, so a bare "herdr"
+    raises FileNotFoundError and the daemon would quit after a few ticks.
+    """
+    # herdr exports HERDR_BIN_PATH from /proc/self/exe, which reads
+    # "/path/to/herdr (deleted)" once the binary has been replaced by an
+    # in-place upgrade - trust it only when it actually resolves.
+    explicit = os.environ.get("HERDR_BIN_PATH")
+    if explicit and os.access(explicit, os.X_OK):
+        return explicit
+    if explicit and explicit.endswith(" (deleted)"):
+        stripped = explicit[: -len(" (deleted)")]
+        if os.access(stripped, os.X_OK):
+            return stripped
+    found = shutil.which("herdr")
+    if found:
+        return found
+    for candidate in ("~/.local/bin/herdr", "/usr/local/bin/herdr",
+                      "/opt/homebrew/bin/herdr", "/usr/bin/herdr"):
+        path = os.path.expanduser(candidate)
+        if os.access(path, os.X_OK):
+            return path
+    return "herdr"
+
+
+HERDR = herdr_bin()
 SOCKET_PATH = os.environ.get("HERDR_SOCKET_PATH", "")
 STATE_DIR = os.environ.get("HERDR_PLUGIN_STATE_DIR") or os.path.expanduser(
     f"~/.local/state/{PLUGIN_ID}")
@@ -183,15 +211,31 @@ def render(stats):
 
 def running_pid():
     try:
-        pid = int(open(PIDFILE).read().strip())
-        os.kill(pid, 0)
-        return pid
+        return int(open(PIDFILE).read().strip())
     except Exception:
         return None
 
 
+def daemon_alive():
+    """True when a monitor holds the pidfile lock.
+
+    The lock, not the pid, is the authority: pids are recycled fast enough on a
+    busy machine that a stale pidfile regularly points at an unrelated live
+    process, and `ensure` would then never restart a dead monitor.
+    """
+    if not os.path.exists(PIDFILE):
+        return False
+    try:
+        with open(PIDFILE, "a+") as handle:
+            fcntl.flock(handle, fcntl.LOCK_EX | fcntl.LOCK_NB)
+            fcntl.flock(handle, fcntl.LOCK_UN)
+        return False
+    except OSError:
+        return True
+
+
 def cmd_ensure():
-    if running_pid():
+    if daemon_alive():
         return
     os.makedirs(STATE_DIR, exist_ok=True)
     # check-then-spawn has a tiny race; a duplicate daemon exits on its first tick
@@ -280,7 +324,7 @@ def cmd_daemon():
 
 
 def cmd_stop():
-    pid = running_pid()
+    pid = running_pid() if daemon_alive() else None
     if pid:
         try:
             os.kill(pid, signal.SIGTERM)
