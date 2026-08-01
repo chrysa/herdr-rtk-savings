@@ -18,7 +18,7 @@ its panes actually run in.
 ∑ 57% ·18M
 ```
 
-- `prefix+r` (optional keybinding below) opens a detail popup: today / 7 days / lifetime
+- `prefix+alt+r` (optional keybinding below) opens a detail popup: today / 7 days / lifetime
   meters per workspace, plus the timestamp of the last command RTK recorded.
 
 Numbers match `rtk gain -p` exactly — same database, same arithmetic.
@@ -61,9 +61,11 @@ rows = [
 
 Optional popup keybinding:
 
+`prefix+r` is taken by the built-in resize mode, so bind the popup elsewhere:
+
 ```toml
 [[keys.command]]
-key = "prefix+r"
+key = "prefix+alt+r"
 type = "shell"
 command = '"$HERDR_BIN_PATH" plugin pane open --plugin chrysa.rtk-savings --entrypoint savings'
 ```
