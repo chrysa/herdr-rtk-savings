@@ -250,9 +250,17 @@ def cmd_daemon():
         return
     published = {}  # workspace_id -> (variant, text, monotonic_ts)
     failures = 0
+    socket_misses = 0
     while True:
         if SOCKET_PATH and not os.path.exists(SOCKET_PATH):
-            break  # herdr server is gone
+            # a config reload re-creates the socket, so only a sustained
+            # absence means the herdr server is really gone
+            socket_misses += 1
+            if socket_misses >= 3:
+                break
+            time.sleep(10)
+            continue
+        socket_misses = 0
         try:
             with open_db(CONFIG["db_path"]) as conn:
                 publish_round(conn, published)
