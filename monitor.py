@@ -21,6 +21,7 @@ Commands:
   stop    stop the monitor and clear the sidebar tokens
   popup   detail view for `herdr plugin pane open`
 """
+import fcntl
 import json
 import os
 import signal
@@ -223,13 +224,30 @@ def publish_round(conn, published):
     return True
 
 
-def cmd_daemon():
+def claim_pidfile():
+    """Exclusive daemon slot, or None when another daemon already holds it.
+
+    The pid check in `ensure` races when two events fire together, so the
+    winner is decided here by an flock the loser cannot take.
+    """
     os.makedirs(STATE_DIR, exist_ok=True)
-    other = running_pid()
-    if other and other != os.getpid():
+    handle = open(PIDFILE, "a+")
+    try:
+        fcntl.flock(handle, fcntl.LOCK_EX | fcntl.LOCK_NB)
+    except OSError:
+        handle.close()
+        return None
+    handle.seek(0)
+    handle.truncate()
+    handle.write(str(os.getpid()))
+    handle.flush()
+    return handle
+
+
+def cmd_daemon():
+    lock = claim_pidfile()
+    if not lock:
         return
-    with open(PIDFILE, "w") as f:
-        f.write(str(os.getpid()))
     published = {}  # workspace_id -> (variant, text, monotonic_ts)
     failures = 0
     while True:
@@ -246,6 +264,7 @@ def cmd_daemon():
             time.sleep(10)
             continue
         time.sleep(POLL_S)
+    lock.close()
     try:
         os.remove(PIDFILE)
     except OSError:
