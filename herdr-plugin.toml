@@ -27,14 +27,12 @@ command = ["python3", "monitor.py", "ensure"]
 on = "pane.created"
 command = ["python3", "monitor.py", "ensure"]
 
-# herdr recycles plugin-spawned daemons, so re-arm on plain navigation too;
-# `ensure` is a pid check that exits immediately when the monitor is alive.
+# Re-arm on navigation so a monitor lost to a server restart comes back without
+# waiting for a new pane; `ensure` is a pid check that exits when it is alive.
+# pane.focused is deliberately not wired: it fires on every mouse move between
+# panes, and a python spawn per focus change is not worth the redundancy.
 [[events]]
 on = "workspace.focused"
-command = ["python3", "monitor.py", "ensure"]
-
-[[events]]
-on = "pane.focused"
 command = ["python3", "monitor.py", "ensure"]
 
 [[panes]]
