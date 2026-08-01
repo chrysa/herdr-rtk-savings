@@ -100,6 +100,21 @@ typically `~/.config/herdr/plugins/config/chrysa.rtk-savings/`):
 
 Restart the monitor after editing (`stop` + `start` actions).
 
+## Troubleshooting
+
+- **Rows never appear, monitor dies after ~30 s.** herdr sets `HERDR_BIN_PATH` from
+  `/proc/self/exe`, which reads `/path/to/herdr (deleted)` once herdr has been upgraded
+  in place. Every CLI call then fails with `FileNotFoundError`. The plugin already works
+  around it (it validates the path, strips the ` (deleted)` suffix, then falls back to
+  `PATH` and the usual install locations) — but any other plugin spawning `herdr` from
+  that variable will silently stop. Restarting the herdr server clears the stale path.
+- **`ps | grep` shows no daemon while it is running.** If RTK's Claude Code hook is
+  active, `ps` output goes through RTK's filter and the match can be dropped. Use
+  `rtk proxy ps -eo pid,etime,cmd` for the raw output.
+- **Two daemons at once.** They are keyed by `HERDR_PLUGIN_STATE_DIR`, which herdr sets
+  and a manual `python3 monitor.py ensure` does not — the two use different pidfiles and
+  therefore different locks. Start the monitor through herdr, not by hand.
+
 ## Requirements
 
 - Herdr ≥ 0.7.0, macOS or Linux, `python3` in `PATH`
