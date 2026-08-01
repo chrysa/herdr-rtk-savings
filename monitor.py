@@ -52,7 +52,9 @@ PIDFILE = os.path.join(STATE_DIR, "monitor.pid")
 
 def load_config():
     """Optional <config dir>/config.json: db_path, window ("today"|"24h"|"7d"|"all")."""
-    settings = {"db_path": DEFAULT_DB, "window": "today", "min_commands": 1}
+    # min_commands keeps an early-morning handful of commands from rendering a
+    # statistically meaningless rate; below it the row shows the lifetime total.
+    settings = {"db_path": DEFAULT_DB, "window": "today", "min_commands": 20}
     try:
         with open(os.path.join(CONFIG_DIR, "config.json"), encoding="utf-8") as f:
             settings.update(json.load(f))

@@ -87,13 +87,14 @@ typically `~/.config/herdr/plugins/config/chrysa.rtk-savings/`):
 {
   "db_path": "~/.local/share/rtk/history.db",
   "window": "today",
-  "min_commands": 1
+  "min_commands": 20
 }
 ```
 
 - `db_path` — RTK history database.
 - `window` — `today`, `24h`, `7d`, or `all` (the gauge window; `all` never falls back).
-- `min_commands` — below this many commands in the window, the row shows the lifetime total.
+- `min_commands` — below this many commands in the window, the row shows the lifetime total,
+  so a handful of early-morning commands never renders a meaningless rate.
 
 Restart the monitor after editing (`stop` + `start` actions).
 
