@@ -23,6 +23,24 @@ its panes actually run in.
 
 Numbers match `rtk gain -p` exactly — same database, same arithmetic.
 
+The popup, one block per workspace:
+
+```
+ RTK token savings  ~/.local/share/rtk/history.db
+
+  guideline-checker  ~/projects/chrysa/guideline-checker
+    Today    ····························   1%        1 saved  5 cmd
+    7 days   ███████████████·············  53%      30K saved  162 cmd
+    Lifetime █████████████████···········  62%     779K saved  1527 cmd
+
+  homeassistant-config  ~/projects/chrysa/homeassistant-config
+    Today    ██████████████████··········  64%     1.3K saved  17 cmd
+    7 days   █████████████████···········  61%     5.8K saved  70 cmd
+    Lifetime ████████████████████········  70%      15K saved  102 cmd
+
+ last recorded command: 2026-08-01T16:12:04.481+00:00
+```
+
 ## How it works
 
 - A single-file, stdlib-only Python daemon reads RTK's own history database
@@ -117,8 +135,12 @@ Restart the monitor after editing (`stop` + `start` actions).
 
 ## Requirements
 
-- Herdr ≥ 0.7.0, macOS or Linux, `python3` in `PATH`
+- Herdr ≥ 0.7.0, `python3` in `PATH`
 - RTK installed and recording (`rtk gain` must show data)
+
+Linux only for now. Nothing in the code is platform-specific — it is stdlib, a read-only
+sqlite open and the herdr CLI — but it has never been run on macOS, so the manifest does
+not claim it. If you try it there, say so and it goes back in.
 
 If RTK stops recording, rows freeze on the lifetime total (`∑`) — the popup's
 "last recorded command" line is the tell.
