@@ -9,6 +9,9 @@ branch = true
 [tool.coverage.report]
 show_missing = true
 
+[tool.ruff]
+extend-exclude = [".claude", "scripts/quality_gate.py"]
+
 [tool.ruff.lint]
 select = [
     "C901",
