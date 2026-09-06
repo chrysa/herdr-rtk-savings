@@ -3,7 +3,9 @@ name = "RTK Savings"
 version = "0.1.0"
 min_herdr_version = "0.7.0"
 description = "RTK (Rust Token Killer) token-savings gauges on every space row (savings rate, tokens saved, lifetime fallback). Read straight from RTK's local history database - no subprocess per workspace, no network."
-platforms = ["macos", "linux"]
+# macOS should work (stdlib only, no platform-specific path) but is untested;
+# add it back once someone has actually run it there.
+platforms = ["linux"]
 
 [[actions]]
 id = "start"
