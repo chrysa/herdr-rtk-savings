@@ -1,0 +1,22 @@
+{
+  "adrs": [],
+  "contracts": [
+    "standards"
+  ],
+  "ddd_level": "(not available)",
+  "dependencies": {},
+  "depends_on_shared_standards": true,
+  "description": "[RTK](https://github.com/dhamidi/rtk) (Rust Token Killer) token-savings gauges in the",
+  "entry_points": [],
+  "key_directories": [
+    ".claude",
+    ".github",
+    "docs",
+    "scripts",
+    "standards",
+    "tests"
+  ],
+  "name": "herdr-rtk-savings",
+  "profiles": [],
+  "schema": "chrysa.context-map/1"
+}
