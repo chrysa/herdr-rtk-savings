@@ -1,0 +1,119 @@
+{
+  "_comment": "Claude Code settings template — copy to .claude/settings.json and customize",
+  "autoCompact": true,
+  "autoCompactThreshold": 0.85,
+  "hooks": {
+    "Notification": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "notify-send 'Claude Code' '$CLAUDE_NOTIFICATION'"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "sh -c 'f=\"$CLAUDE_PROJECT_DIR/.claude/hooks/verifiable-thresholds.cjs\"; [ ! -f \"$f\" ] || node \"$f\"'",
+            "timeout": 10000
+          }
+        ]
+      }
+    ],
+    "PreCompact": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.claude/hooks/pre-compact.sh",
+            "timeout": 10000
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "sh -c 'f=\"$CLAUDE_PROJECT_DIR/.claude/hooks/secret-scanner.cjs\"; [ ! -f \"$f\" ] || node \"$f\"'",
+            "timeout": 10000
+          }
+        ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "sh -c 'f=\"$CLAUDE_PROJECT_DIR/.claude/hooks/circuit-breaker.cjs\"; [ ! -f \"$f\" ] || node \"$f\"'",
+            "timeout": 5000
+          }
+        ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "CMD=$(python3 -c \"import json,sys; d=json.load(sys.stdin); print(d.get('tool_input',d).get('command',''))\" 2>/dev/null || true); case \"$CMD\" in *grep*|*rg\\ *|*ripgrep*|*find\\ *|*fd\\ *|*ack\\ *|*ag\\ *)   [ -f graphify-out/graph.json ] &&   echo '{\"hookSpecificOutput\":{\"hookEventName\":\"PreToolUse\",\"additionalContext\":\"graphify: knowledge graph at graphify-out/. For focused questions, run `graphify query \\\"<question>\\\"` (scoped subgraph, usually much smaller than GRAPH_REPORT.md) instead of grepping raw files. Read GRAPH_REPORT.md only for broad architecture context.\"}}'   || true ;; esac"
+          },
+          {
+            "command": "sh -c 'f=\"$CLAUDE_PROJECT_DIR/.claude/hooks/check-no-env-files.cjs\"; [ ! -f \"$f\" ] || node \"$f\"'",
+            "name": "check-no-env-files",
+            "timeout": 5000,
+            "type": "command"
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "sh -c 'f=\"$CLAUDE_PROJECT_DIR/.claude/hooks/frustration-detection.cjs\"; [ ! -f \"$f\" ] || node \"$f\"'",
+            "timeout": 5000
+          }
+        ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "sh -c 'f=\"$CLAUDE_PROJECT_DIR/.claude/ape/ape_hook.py\"; s=\"$CLAUDE_PROJECT_DIR/.claude/ape/ape-transform-v2.md\"; [ ! -f \"$f\" ] || python3 \"$f\" --spec \"$s\"'"
+          }
+        ]
+      }
+    ]
+  },
+  "permissions": {
+    "allow": [
+      "Bash(git status)",
+      "Bash(git diff:*)",
+      "Bash(git log:*)",
+      "Bash(git add:*)",
+      "Bash(gh issue view:*)",
+      "Bash(gh pr view:*)",
+      "Bash(gh pr diff:*)",
+      "Bash(gh pr checks:*)"
+    ],
+    "ask": [
+      "Bash(git push:*)"
+    ],
+    "deny": [
+      "Read(./.env)",
+      "Read(./.env.*)",
+      "Read(./**/secrets/**)"
+    ]
+  }
+}
