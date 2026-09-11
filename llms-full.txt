@@ -89,13 +89,13 @@ herdr-rtk-savings — technical digest
     action-check.yml
     approved-label.yml
     auto-assign.yml
-    auto-update-pre-commit.yml
     ci.yml
     dependabot-auto-merge.yml
     detect-conflicts.yml
     labeler.yml
     pr-dependencies.yml
     pull-request-size.yml
+    release.yml
     sync-labels.yml
     update-pr-body.yml
 .gitignore
@@ -107,6 +107,7 @@ CODEOWNERS
 CONTRIBUTING.md
 GitVersion.yml
 LICENSE
+Makefile
 README.md
 cliff.toml
 docs/
@@ -117,6 +118,7 @@ monitor.py
 opencode.json
 pyproject.toml
 scripts/
+  gen_context_files.py
   quality_gate.py
 standards/
   rules/
@@ -151,5 +153,6 @@ tests/
 ## Modules
 
 monitor.py
+scripts/gen_context_files.py — Generate the standardised per-repo context files from the repo's own content.
 scripts/quality_gate.py
 tests/test_monitor.py — Unit tests for the herdr-rtk-savings monitor.
