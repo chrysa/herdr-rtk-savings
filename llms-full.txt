@@ -92,6 +92,7 @@ herdr-rtk-savings — technical digest
     ci.yml
     dependabot-auto-merge.yml
     detect-conflicts.yml
+    enforce-shortcut-link.yml
     labeler.yml
     pr-dependencies.yml
     pull-request-size.yml
