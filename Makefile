@@ -1,4 +1,5 @@
 #!make
+# makefile-tier: lib
 # Self-contained socle for a host-run Python library (repos.yml runtime: exempt:lib).
 # Tools are invoked through `python -m` and degrade gracefully when absent locally;
 # CI runs the authoritative gate via pre-commit / GitHub Actions.
@@ -6,7 +7,7 @@ PROJECT_NAME ?= herdr-rtk-savings
 SRC          ?= .
 PY           ?= python
 .DEFAULT_GOAL := help
-.PHONY: help install install-dev lint format format-check typecheck test test-cov pre-commit clean ci quality-gate-baseline quality-gate-verify
+.PHONY: help install install-dev lint format format-check typecheck test test-cov pre-commit clean ci quality-gate-baseline quality-gate-verify build dev
 
 help: ## Display this help message
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) \
@@ -14,6 +15,12 @@ help: ## Display this help message
 
 install: ## Install the package
 	@$(PY) -m pip install -e .
+
+build: ## Build the wheel and sdist
+	@$(PY) -m build
+
+dev: install ## Prepare the local dev environment (editable install)
+	@echo "dev environment ready — run 'make check' or 'make test'."
 
 install-dev: ## Install the package with dev extras
 	@$(PY) -m pip install -e ".[dev]" || $(PY) -m pip install -e .
