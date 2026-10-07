@@ -27,6 +27,9 @@ herdr-rtk-savings — technical digest
     issue.md
     reviewpr.md
     test.md
+  hooks/
+    claude-config-drift.cjs
+    graphify-auto-update.cjs
   skills/
     accessibility/
       SKILL.md
@@ -102,6 +105,7 @@ herdr-rtk-savings — technical digest
 .gitignore
 .pre-commit-config.yaml
 AGENTS.md
+ARCHITECTURE.md
 CHANGELOG.md
 CLAUDE.md
 CODEOWNERS
@@ -126,6 +130,7 @@ standards/
     README.md
     accessibility.md
     agents.md
+    ai-orchestration.md
     api.md
     architecture.md
     backend-python.md
