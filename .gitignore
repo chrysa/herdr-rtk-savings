@@ -13,3 +13,7 @@ __pycache__/
 secrets/
 .claude/settings.local.json
 CLAUDE.local.md
+
+coverage.xml
+.coverage
+reports/

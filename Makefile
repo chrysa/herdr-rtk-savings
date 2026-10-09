@@ -7,7 +7,7 @@ PROJECT_NAME ?= herdr-rtk-savings
 SRC          ?= .
 PY           ?= python
 .DEFAULT_GOAL := help
-.PHONY: help install install-dev lint format format-check typecheck test test-cov pre-commit clean ci quality-gate-baseline quality-gate-verify build dev
+.PHONY: help install install-dev lint format format-check typecheck test test-cov pre-commit clean ci quality-gate-baseline quality-gate-verify build dev docker-test
 
 help: ## Display this help message
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) \
@@ -42,6 +42,9 @@ test: ## Run the test suite
 
 test-cov: ## Run tests with coverage
 	@$(PY) -m pytest --cov=$(SRC) --cov-report=term-missing
+
+docker-test: ## Run tests in Docker (CI-compatible) and export coverage.xml
+	@docker build --target coverage --output type=local,dest=. -f Dockerfile.test .
 
 pre-commit: ## Run pre-commit hooks on all files
 	@command -v pre-commit >/dev/null 2>&1 && pre-commit run --all-files \
