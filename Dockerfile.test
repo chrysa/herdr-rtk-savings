@@ -1,0 +1,23 @@
+# Test image for a host-run library: runs the suite in a clean container.
+# Tests use fakes for herdr/RTK (no real binaries needed). No runtime image.
+ARG PYTHON_VERSION=3.14
+FROM python:${PYTHON_VERSION}-slim AS test
+
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1
+
+WORKDIR /app
+
+RUN pip install --no-cache-dir pytest coverage
+
+COPY pyproject.toml monitor.py ./
+COPY tests/ ./tests/
+
+RUN coverage run -m pytest && coverage xml -o /app/coverage.xml && coverage report --fail-under=85
+
+CMD ["sh", "-c", "coverage run -m pytest && coverage report --fail-under=85"]
+
+# Scratch stage used only to export coverage.xml:
+#   docker build --target coverage --output type=local,dest=. -f Dockerfile.test .
+FROM scratch AS coverage
+COPY --from=test /app/coverage.xml /coverage.xml

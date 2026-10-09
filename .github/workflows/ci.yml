@@ -90,7 +90,7 @@ jobs:
                   project-key: chrysa_herdr-rtk-savings
                   organization: chrysa
                   project-name: herdr-rtk-savings
-                  sources: herdr_rtk_savings
+                  sources: monitor.py
                   tests: tests
                   # Downloaded from the test-results-3.14 artifact into reports/
                   # by the action; matches sonar-scan-python's default path.
