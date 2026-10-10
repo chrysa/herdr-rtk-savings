@@ -1,0 +1,12 @@
+.git
+.github
+.claude
+.venv
+__pycache__
+*.pyc
+.coverage
+coverage.xml
+reports
+graphify-out
+.ruff_cache
+.pytest_cache

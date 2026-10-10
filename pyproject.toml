@@ -5,9 +5,11 @@ testpaths = ["tests"]
 [tool.coverage.run]
 source = ["monitor"]
 branch = true
+relative_files = true
 
 [tool.coverage.report]
 show_missing = true
+fail_under = 85
 
 [tool.ruff]
 extend-exclude = [".claude", "scripts/quality_gate.py"]
