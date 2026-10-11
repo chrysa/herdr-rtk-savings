@@ -120,5 +120,7 @@
         ]
       }
     ]
-  }
+  },
+  "model": "haiku",
+  "effortLevel": "low"
 }
