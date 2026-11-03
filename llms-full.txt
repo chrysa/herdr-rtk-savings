@@ -9,6 +9,7 @@ herdr-rtk-savings — technical digest
 
 .claude/
   agents/
+    code-reviewer.md
     general-backend-developer.md
     general-code-quality-debugger.md
     general-devops.md
@@ -19,19 +20,17 @@ herdr-rtk-savings — technical digest
     general-solution-architect.md
     general-technical-project-lead.md
     general-technical-writer.md
-  commands/
-    adr-new.md
-    commit.md
-    custom-init.md
-    help-commands.md
-    issue.md
-    reviewpr.md
-    test.md
+    security-auditor.md
+    test-runner.md
   hooks/
     claude-config-drift.cjs
+    format.py
     graphify-auto-update.cjs
+  settings.json
   skills/
     accessibility/
+      SKILL.md
+    adr-new/
       SKILL.md
     agent-patterns/
       SKILL.md
@@ -46,9 +45,13 @@ herdr-rtk-savings — technical digest
       scripts/
     clean-architecture/
       SKILL.md
+    commit/
+      SKILL.md
     contract-testing/
       SKILL.md
     council/
+      SKILL.md
+    custom-init/
       SKILL.md
     dockerfile-multistage/
       SKILL.md
@@ -61,11 +64,21 @@ herdr-rtk-savings — technical digest
       gitnexus-guide/
       gitnexus-impact-analysis/
       gitnexus-refactoring/
+    graphify/
+      SKILL.md
+    help-commands/
+      SKILL.md
     hunt/
       SKILL.md
     implement/
       SKILL.md
+    issue/
+      SKILL.md
     plan/
+      SKILL.md
+    review-changes/
+      SKILL.md
+    reviewpr/
       SKILL.md
     rollout-status/
       SKILL.md
@@ -73,12 +86,15 @@ herdr-rtk-savings — technical digest
       SKILL.md
     standards-authoring/
       SKILL.md
+    test/
+      SKILL.md
     testing-pytest/
       SKILL.md
     ui-ux/
       SKILL.md
     verification-loop/
       SKILL.md
+.dockerignore
 .editorconfig
 .env.example
 .gitattributes
@@ -113,10 +129,16 @@ CHANGELOG.md
 CLAUDE.md
 CODEOWNERS
 CONTRIBUTING.md
+DECISIONS.md
+Dockerfile.test
+GLOSSARY.md
 GitVersion.yml
 LICENSE
 Makefile
 README.md
+REVIEW.md
+SECURITY.md
+TESTING.md
 cliff.toml
 docs/
   reference/
@@ -161,6 +183,7 @@ tests/
 
 ## Modules
 
+.claude/hooks/format.py
 monitor.py
 scripts/gen_context_files.py — Generate the standardised per-repo context files from the repo's own content.
 scripts/quality_gate.py
