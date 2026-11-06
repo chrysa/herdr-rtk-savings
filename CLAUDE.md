@@ -1,3 +1,5 @@
+@AGENTS.md
+
 # CLAUDE.md — [PROJECT_NAME]
 
 > Replace [PROJECT_NAME] and all [PLACEHOLDER] values before committing.
