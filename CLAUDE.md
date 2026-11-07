@@ -1,5 +1,7 @@
 # CLAUDE.md — [PROJECT_NAME]
 
+@AGENTS.md
+
 > Replace [PROJECT_NAME] and all [PLACEHOLDER] values before committing.
 > @[claude-sonnet-4-6]
 
