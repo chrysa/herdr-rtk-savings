@@ -237,3 +237,9 @@ Type `/graphify` in Copilot Chat to build or update the graph.
 ### Local AI orchestration & local-first · `standards/rules/ai-orchestration.md`
 - AI orchestration & local-first
 <!-- chrysa:standards:end -->
+
+## Product design contract
+
+Before UI, component, style, navigation or asset work, read [DESIGN.md](DESIGN.md)
+and any product-specific specification it links. Keep the contract and acceptance
+evidence aligned with UI changes. Load it on demand; do not duplicate its tokens here.
