@@ -1,60 +1,133 @@
 # herdr-rtk-savings — Design contract
 
-Baseline contract for the human-facing surface documented in this repository. This change documents requirements; it does not redesign or certify the implementation.
+> Contract for the two terminal surfaces of this herdr plugin: the savings gauge on each
+> space row of the herdr sidebar, and the detail popup. Read it before changing what the
+> plugin prints or how it is styled; update it in the same change. Status:
+> **[implemented]** links the code · **[decided]** names the decision · **[proposed]** is not
+> agreed. This file documents the current surface; it does not redesign it.
 
-## Scope and priority journeys
+## 1. Surface and status
 
-Native/editor/terminal surface: preserve the host's navigation and accessibility
-conventions. Do not force browser layouts or a new frontend framework onto this UI.
+- **Surface:** terminal UI hosted by herdr — sidebar tokens published per workspace and a
+  popup pane. No web or graphical UI. **[implemented]** ([monitor.py](monitor.py),
+  [herdr-plugin.toml](herdr-plugin.toml))
+- **Lifecycle:** shipped, version 0.1.0 in [herdr-plugin.toml](herdr-plugin.toml); Linux only
+  (macOS untested, so not claimed).
+- **Detailed specs:** none. Behaviour and configuration: [README.md](README.md); decisions:
+  [DECISIONS.md](DECISIONS.md).
 
-1. Identify the workspace a savings gauge belongs to.
-2. Read the savings rate and token count separately.
-3. Recognise missing or stale measurements.
+## 2. Users, devices and priority tasks
 
-## Sources and implementation evidence
+| User | Context and device | Priority tasks (three at most) |
+| --- | --- | --- |
+| Developer running agents through RTK in herdr | Linux terminal, sidebar always visible, popup on demand | read a workspace's savings rate at a glance · compare today, 7 days and lifetime · notice that RTK stopped recording |
 
-- [README.md](README.md)
+Primary action: in the sidebar, read the rate of the current workspace; in the popup, find the
+workspace block and its *Today* line.
 
-These are repository evidence, not proof that every desired journey is implemented.
-Where source code and product intent differ, record the gap explicitly.
+## 3. Journeys and navigation
 
-## Visual language and components
+- **J1 — Glance:** each space row shows `▰▰▰▰▰▰▰▱▱▱ 69% ·2.1M` (rate over the window, tokens
+  saved), or `∑ 56% ·18.4M` (lifetime) when the window has fewer than `min_commands`
+  commands. A workspace without data shows no row. **[implemented]** (`render` in
+  [monitor.py](monitor.py))
+- **J2 — Detail:** a keybinding opens the popup (70 % × 45 %): one block per workspace with
+  *Today*, *7 days* and *Lifetime* meters, then the last recorded command time; it redraws every
+  30 s until closed. **[implemented]** (`cmd_popup` in [monitor.py](monitor.py))
+- **J3 — Set up:** link the plugin, add the four styled rows to the herdr config, invoke
+  *start*; optional `config.json` (`db_path`, `window`, `min_commands`). The monitor restarts
+  itself on workspace and pane events. **[implemented]** ([README.md](README.md))
+- **Information architecture:** one token variant per workspace (`rtk`, `rtk_low`, `rtk_hi`,
+  `rtk_sum`), each styled by its own sidebar row (ADR-0003 in [DECISIONS.md](DECISIONS.md),
+  **[decided]**); popup blocks sorted by workspace label.
+- **Density:** compact — one sidebar line per workspace; three lines per popup block.
 
-A complete semantic token/brand registry has not been established by this documentation
-pass. Preserve existing native/engine/host controls. Before adding custom styling,
-record colour roles, type roles, spacing, component states and their owning source;
-then implement those tokens once. Unspecified brand decisions remain open.
+## 4. Identity
 
-Use a legible body face and reserve monospace for code, identifiers and numeric data.
-Prefer clear hierarchy, predictable spacing and restrained, functional transitions.
-Keep dense operational data scannable; progressively disclose advanced controls.
-Reuse components and document default, focus, active, disabled and error states.
-Do not introduce a light/dark switch or new brand persona without a product decision.
+No brand, logo or palette of its own: colour in the sidebar belongs to the user's herdr config.
+The signature element is the ten-cell gauge glyph (`▰`/`▱`) next to a percentage. The
+sidebar-token gauge pattern follows `houser.claude-usage` (credited in the README); no code or
+asset was copied.
 
-## UX acceptance and verification
+## 5. Tokens and components (owned elsewhere)
 
-- Make the primary task visible; preserve navigation, filters, input and focus across updates.
-- Define loading, empty, validation error, unavailable dependency, stale data and recovery
-  states where relevant. Never display a failed operation as successful.
-- Use text or icons with labels as well as colour for status. Keep keyboard focus visible,
-  navigation predictable and motion optional; respect reduced-motion preferences.
-- For web content, target WCAG 2.2 AA; use at least 4.5:1 contrast for ordinary text
-  (3:1 for qualifying large text), and aim for 44 CSS px touch controls. Verify the
-  complete applicable standard, not only these examples. Apply equivalent native
-  accessibility APIs to desktop controls; do not claim web certification for a native UI.
-- Test the primary journey, empty data, a failed operation and recovery at representative
-  viewport/window sizes. Verify keyboard use, long labels and realistic data volumes.
-  Keep screenshots or other reproducible evidence with the UI change; document checks
-  that could not run. Static lint is not evidence of usability or accessibility compliance.
-- Maintain provenance and licence records for fonts, icons, artwork and generated assets;
-  serve assets locally where feasible. Do not copy a reference brand's logos or identity.
-- Keep detailed journeys/acceptance evidence in existing project documentation. Update
-  this contract alongside UI changes; preserve existing component and token ownership.
+| Concern | Source of truth | Rules of use |
+| --- | --- | --- |
+| Sidebar colours | the user's `~/.config/herdr/config.toml` (example rows in [README.md](README.md)) | one `fg` per variant; the plugin never sends ANSI in tokens |
+| Popup colours | `meter`, `RESET`, `DIM`, `BOLD` in [monitor.py](monitor.py) | 16-colour ANSI: green ≥ 80 %, yellow ≥ 40 %, red below |
+| Thresholds and gauge | `LOW_PCT`, `HIGH_PCT`, `GAUGE_CELLS` in [monitor.py](monitor.py) | 40 / 80 %, ten cells |
+| Numbers | `compact` in [monitor.py](monitor.py) | K / M / G suffixes, one decimal below 10 |
+| Timing | `POLL_S`, `TTL_MS`, `REFRESH_S` in [monitor.py](monitor.py) | read every 60 s, tokens expire after 20 min, re-report every 600 s |
+| Popup size | `[[panes]]` in [herdr-plugin.toml](herdr-plugin.toml) | 70 % wide, 45 % high |
 
-## Agent and lint integration
+- **Shared contract:** `contract.css` and `@chrysa/ui` do not apply to a terminal surface.
+- **Design drift:** the module docstring says the row is "dim under 40%, plain up to 80%, bold
+  green above", the README example says red, yellow, green; the popup colours are hard-coded and
+  cannot follow the user's theme.
 
-Consult this file before UI work and keep it aligned with the implementation. The
-filename alone does not load it into Claude Code or other agents. Use an explicit
-on-demand reference from the repository's instruction files. Prism validates the
-instruction document's size, imports and dead local references; it does not choose
-an aesthetic, enforce this product's UX or certify the resulting interface.
+## 6. Interaction and states
+
+- **Action feedback:** *start* and *stop* actions; *stop* clears every token. **[implemented]**
+- **Forms:** none; configuration is a JSON file read at start.
+- **Data states:**
+
+  | State | Where it appears | Behaviour |
+  | --- | --- | --- |
+  | Loading | popup | first frame after a local read; no loading text |
+  | Empty | sidebar, popup | no row for a workspace without data; `no RTK activity recorded for this path` |
+  | Error | popup | `herdr is not reachable.`; `RTK history database unavailable: <error>` |
+  | Offline / backend unreachable | sidebar | the monitor exits after repeated database or socket failures; rows expire with the TTL |
+  | Stale data | sidebar, popup | lifetime fallback marked `∑`; popup shows `last recorded command: <ISO time>`; the sidebar has no age cue |
+  | Reconnect | sidebar | `ensure` re-arms the monitor on `workspace.created`, `pane.created`, `workspace.focused` |
+
+- **Real-time:** herdr replaces each token in place. The popup clears and redraws every 30 s;
+  blocks below its height are cut (no scroll).
+- **Motion:** none (FE-053, terminal: no animation).
+
+## 7. Responsive and support conventions
+
+Sidebar text is about 20 characters wide. Popup lines are about 75 columns (meter fixed at 28
+cells), so a popup narrower than that wraps. Plugin commands run without the login `PATH`: the
+herdr binary is resolved defensively (ADR-0006). The README suggests `prefix+alt+r` for the
+popup; [herdr-cockpit](https://github.com/chrysa/herdr-cockpit) binds `prefix+ctrl+r` and avoids
+`alt` chords.
+
+## 8. Accessibility
+
+- **Target:** terminal readability; meaning never by colour alone.
+- **Perception:** the rate is always a number next to the gauge; the lifetime fallback is the
+  `∑` symbol, not a colour. **[implemented]**
+- **Keyboard:** the popup has no keys of its own; herdr closes it.
+- **Gaps:** `NO_COLOR` is not honoured in the popup; counts such as `1527 cmd` have no
+  thousands separator (canon display rule); the time is a raw UTC ISO string; no screen-reader
+  pass.
+
+## 9. Assets
+
+None: no fonts, icons or images are shipped. Glyphs are Unicode characters. Repository code:
+[MIT](LICENSE).
+
+## 10. Acceptance criteria and evidence
+
+- **Criteria:** every sidebar row carries a rate and an amount; the variant follows the 40 / 80
+  thresholds and `∑` marks the lifetime fallback; figures match `rtk gain -p`; the popup names
+  its empty and error states; no row appears for a workspace without data. Covered by
+  `test_render_*`, `test_popup_*` and `test_query_project_*` in
+  [tests/test_monitor.py](tests/test_monitor.py).
+- **Evidence log:**
+
+  | Date | Change | Checks run (tool, sizes, modes) | Result | Not run, and why |
+  | --- | --- | --- | --- | --- |
+  | 2026-11-08 | contract written from the code | source review | gaps listed in §11 | no terminal run: documentation-only change |
+
+## 11. Open choices, known gaps and maintenance
+
+- **Open choices:**
+  - **[proposed]** honour `NO_COLOR` and size the popup meter from the terminal width.
+  - **[proposed]** group thousands with a narrow no-break space in popup counts.
+  - **[proposed]** show the age of the last recorded command ("12 min ago") next to the ISO time.
+  - **[proposed]** align the docstring and the README on one colour rule.
+- **Known gaps:** a frozen RTK history looks like a valid lifetime total in the sidebar; the
+  popup cannot scroll.
+- **Maintenance:** owner of this repository. Update this file with any change to printed
+  wording, thresholds, token variants or popup layout, and add an evidence row.
