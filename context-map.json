@@ -10,6 +10,7 @@
   "entry_points": [],
   "key_directories": [
     ".claude",
+    ".codex",
     ".github",
     "docs",
     "scripts",

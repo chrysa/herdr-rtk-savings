@@ -94,6 +94,9 @@ herdr-rtk-savings — technical digest
       SKILL.md
     verification-loop/
       SKILL.md
+.codex/
+  rules/
+    prism-ai-lint.rules
 .dockerignore
 .editorconfig
 .env.example
